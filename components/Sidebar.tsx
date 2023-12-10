@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 interface ILink {
   path: string;
   name: string;
-  requiresAuth?: boolean;
+  requiredPermissions?: string[];
 }
 
 const links: ILink[] = [
@@ -19,19 +19,26 @@ const links: ILink[] = [
   {
     path: "/dashboard",
     name: "Dashboard",
-    requiresAuth: true,
+    requiredPermissions: ["ask:question"],
+  },
+  {
+    path: "/admin",
+    name: "Admin Area",
+    requiredPermissions: ["delete:question"],
   },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, isAuthenticated, isLoading } = useKindeBrowserClient();
+  const { user, isAuthenticated, isLoading, getPermissions } =
+    useKindeBrowserClient();
+  const { permissions } = getPermissions();
 
   return (
     <div className="absolute left-0 top-0 bg-black h-full p-8">
       <div className="flex flex-col">
         {links.map((link) => {
-          if (link.requiresAuth && !isAuthenticated) {
+          if (!link.requiredPermissions && !isAuthenticated) {
             return null;
           }
 
